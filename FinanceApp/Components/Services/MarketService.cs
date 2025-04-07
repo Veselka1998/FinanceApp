@@ -5,7 +5,7 @@ namespace FinanceApp.Components.Services;
 
 public class MarketService
 {
-    // Zde napiš svůj klíč
+    // Zde do proměnné ApiKey napiš svůj API klíč
     private const string ApiKey = "";
     private const string BaseUrl = "https://finnhub.io/api/v1/quote?symbol=";
     public async Task<decimal?> GetStockPrice(string symbol)
