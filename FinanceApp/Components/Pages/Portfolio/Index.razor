@@ -1,0 +1,71 @@
+﻿@page "/portfolio"
+@using FinanceApp.Components.Models
+@using FinanceApp.Components.Services
+@inject PortfolioService PortfolioService
+@inject NavigationManager Navigation
+@inject IJSRuntime JsRuntime
+
+<div style="text-align: center">
+    <h2 style="margin-bottom: 3rem"><b>Portfolio</b></h2>
+</div>
+
+<div class="container my-4">
+    <div class="table-responsive">
+        <NavLink class="btn btn-primary" href="portfoliocreate">Přidat</NavLink>
+        @if (portfolios.Any())
+        {
+            <table class="table table-dark table-hover">
+                <thead>
+                    <tr>
+                        <th>Kvartál</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in portfolios)
+                    {
+                        <tr>
+                            <td>
+                            <NavLink @onclick="@(() => NavigateToDetail(item.Id))">
+                                <h4>@item.QuarterYear</h4>
+                            </NavLink>
+                            </td>
+                            <td id="last-item">
+                                <button class="btn btn-danger btn-sm" type="submit" @onclick="() => DeleteItem(item)">Smazat</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@code {
+    List<Portfolio> portfolios = new();
+    protected override async Task OnInitializedAsync()
+    {
+        portfolios = await PortfolioService.GetPortfoliosAsync();
+        portfolios = portfolios
+            .OrderByDescending(item => int.Parse(item.QuarterYear.Substring(3))) 
+            .ThenByDescending(item => int.Parse(item.QuarterYear.Substring(1, 1))) 
+            .ToList();
+    }
+
+    private async Task DeleteItem(Portfolio portfolio)
+    {
+        if (await JsRuntime.InvokeAsync<bool>("confirm", "Opravdu chcete smazat portfolio?"))
+        {
+            await PortfolioService.DeletePortfolioAsync(portfolio.Id);
+            portfolios.Remove(portfolio);
+            StateHasChanged();
+        }
+    }
+
+    void NavigateToDetail(uint id)
+    {
+        Navigation.NavigateTo($"/portfolio/detail/{id}");
+    }
+
+}
+

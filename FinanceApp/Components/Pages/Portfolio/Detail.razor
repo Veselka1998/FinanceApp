@@ -1,0 +1,128 @@
+﻿@page "/portfolio/detail/{id:int}"
+@using Components.Models
+@using Components.Services
+@using Components.Helpers
+@inject PortfolioService PortfolioService
+@inject FinanceProductService FinanceProductService
+@inject NavigationManager Navigation
+
+<div style="text-align: center">
+    <h2 style="margin-bottom: 3rem"><b>Portfolio - @portfolio.QuarterYear</b></h2>
+</div>
+
+@if (investments.Any(i => i.Value > 0)) 
+{
+    <div class="container mt-4">
+        @foreach (var investment in investments)
+        {
+            @if (investment.Value > 0) 
+            {
+                var percentage = (investment.Value.Value * 100 / (double)allMoney); 
+
+                <div class="mb-2">
+                    <strong>@investment.Key (@percentage.ToString("F2")%)</strong>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar"
+                             style="width: @(Math.Round(percentage))%; background: #207a01"
+                             aria-valuenow="@percentage.ToString("F2")" aria-valuemin="0" aria-valuemax="100">
+                            @percentage.ToString("F2")%
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+}
+@if (allMoney != 0)
+{
+    <div class="container my-4">
+        <div style="text-align: center">
+            <h3>@NumberFormatter.FormatWithSpaces(allMoney.ToString()) Kč</h3>
+        </div>
+    </div>
+}
+<div class="container my-4">
+    <NavLink class="btn btn-primary" @onclick="@(() => NavigateToPortfolioIndex())">Zpět</NavLink>
+    <NavLink class="btn btn-primary" @onclick="@(() => NavigateToDetail((uint)Id))">Přidat</NavLink>
+
+    <div class="table-responsive">
+        @if (financeProducts.Any())
+        {
+        <table class="table table-dark table-hover">
+            <thead>
+                <tr>
+                    <th>Název</th>
+                    <th>Sektor</th>
+                    <th>Hodnota</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach(var item in financeProducts)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.InvestmentType</td>
+                    <td>@NumberFormatter.FormatWithSpaces(item.Price.ToString()) Kč</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" type="submit" @onclick="() => DeleteItem(item)">Smazat</button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        }
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private Portfolio portfolio;
+    private List<FinanceProduct> financeProducts = new();
+    private double allMoney = 0;
+    private List<KeyValuePair<string, double?>> investments = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        portfolio = await PortfolioService.GetPortfolioByIdAsync((uint)Id);
+        financeProducts = await FinanceProductService.GetFinanceProductsAsync();
+        financeProducts = financeProducts.Where(x => x.PortfolioId == (uint)Id).ToList();
+        await GetPortfolioGraph();
+    }
+
+    private async Task DeleteItem(FinanceProduct financeProduct)
+    {
+        await FinanceProductService.DeleteFinanceProductAsync(financeProduct.Id);
+        financeProducts.Remove(financeProduct);
+        await GetPortfolioGraph();
+        StateHasChanged();
+    }
+
+    private async Task GetPortfolioGraph()
+    {
+        var newInvestment = new List<KeyValuePair<string, double?>>()
+        {
+            new KeyValuePair<string, double?>("Akcie", financeProducts.Where(x => x.InvestmentType == "Akcie").Sum(x => x.Price)),
+            new KeyValuePair<string, double?>("Kryptoměny", financeProducts.Where(x => x.InvestmentType == "Kryptoměny").Sum(x => x.Price)),
+            new KeyValuePair<string, double?>("Nemovitosti", financeProducts.Where(x => x.InvestmentType == "Nemovitosti").Sum(x => x.Price)),
+            new KeyValuePair<string, double?>("Komodity", financeProducts.Where(x => x.InvestmentType == "Komodity").Sum(x => x.Price)),
+            new KeyValuePair<string, double?>("Dluhopisy", financeProducts.Where(x => x.InvestmentType == "Dluhopisy").Sum(x => x.Price)),
+            new KeyValuePair<string, double?>("Hotovost", financeProducts.Where(x => x.InvestmentType == "Hotovost").Sum(x => x.Price)),
+            new KeyValuePair<string, double?>("Jiné", financeProducts.Where(x => x.InvestmentType == "Jiné").Sum(x => x.Price)),
+        };
+        investments = newInvestment.OrderByDescending(x => x.Value ?? 0).ToList();
+        allMoney = financeProducts.Sum(x => x.Price);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    void NavigateToDetail(uint id)
+    {
+        Navigation.NavigateTo($"/financeproduct/create/{id}");
+    }
+    void NavigateToPortfolioIndex()
+    {
+        Navigation.NavigateTo($"/portfolio");
+    }
+}

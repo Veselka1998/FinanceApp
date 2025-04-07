@@ -1,0 +1,49 @@
+﻿@page "/note"
+@using Components.Models
+@using Components.Services
+@inject NoteService NoteService
+
+<div style="text-align: center">
+    <h2 style="margin-bottom: 3rem"><b>Poznámky</b></h2>
+</div>
+
+<div class="container my-4">
+    <NavLink class="btn btn-primary" href="/note/create">Přidat</NavLink>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover">
+            <thead>
+                <tr>
+                    <th>Datům</th>
+                    <th>Poznámka</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in notes)
+                {
+                    <tr>
+                        <td>@item.Date.ToString("dd.MM.yyyy")</td>
+                        <td>@item.Text</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" type="submit" @onclick="() => DeleteWorkItem(item)">Smazat</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private List<Note> notes = new List<Note>();
+    protected override async Task OnInitializedAsync()
+    {
+        notes = await NoteService.GetNotesAsync();
+    }
+    private async Task DeleteWorkItem(Note note)
+    {
+        await NoteService.DeleteNoteAsync(note.Id);
+        notes.Remove(note);
+        StateHasChanged();
+    }
+}

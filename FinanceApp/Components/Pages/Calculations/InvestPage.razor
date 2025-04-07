@@ -1,0 +1,83 @@
+﻿@page "/invest"
+@using Components.Models
+
+<div class="container" style="text-align: center;">
+    <h2 style="margin-bottom: 3rem"><b>Spoření</b></h2>
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <EditForm Model="invest" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <div>
+                    <label for="name">Počáteční vklad:</label>
+                    <InputNumber id="name" @bind-Value="invest.StartingAmount" class="form-control" />
+                    <ValidationMessage For="@(() => invest.StartingAmount)" />
+                </div>
+                <div>
+                    <label for="name">Měsíční vklad:</label>
+                    <InputNumber id="name" @bind-Value="invest.MonthlyDeposit" class="form-control" />
+                    <ValidationMessage For="@(() => invest.MonthlyDeposit)" />
+                </div>
+                <div>
+                    <label for="name">Roční zhodnocení:</label>
+                    <InputNumber id="name" @bind-Value="invest.ReturnRate" class="form-control" />
+                    <ValidationMessage For="@(() => invest.ReturnRate)" />
+                </div>
+                <div>
+                    <label for="name">Doba spoření:</label>
+                    <InputNumber id="name" @bind-Value="invest.InvestmentTime" class="form-control" />
+                    <ValidationMessage For="@(() => invest.InvestmentTime)" />
+                </div>
+
+                <div style="text-align:center; margin-top: 1rem;">
+                    <button type="submit" class="btn btn-primary">Spočítat</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+@if (calculateTotalInvestment.Any())
+{
+    <h3 style="margin-block: 2rem; text-align: center">@invest.ResultMoney Kč</h3>
+    <div class="container my-4">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover">
+                <thead>
+                    <tr>
+                        <th>Rok</th>
+                        <th>Vloženo</th>
+                        <th>Zisk</th>
+                        <th>Celkem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < calculateTotalInvestment.Count(); i++)
+                    {
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>@calculateInvestedAmount[i]</td>
+                            <td><b style="color: #207a01">@calculateProfit[i]</b></td>
+                            <td>@calculateTotalInvestment[i]</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    Invest invest = new Invest();
+
+    List<string> calculateTotalInvestment = new List<string>();
+    List<string> calculateProfit = new List<string>();
+    List<string> calculateInvestedAmount = new List<string>();
+
+    private async void HandleValidSubmit()
+    {
+        calculateTotalInvestment = invest.CalculateTotalInvestment();
+        calculateProfit = invest.CalculateProfit();
+        calculateInvestedAmount = invest.CalculateInvestedAmount();
+    }
+}

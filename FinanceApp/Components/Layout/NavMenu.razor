@@ -1,0 +1,47 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Finance</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <div style="display: flex; text-align:center; justify-content: right ;color: white;">
+                    <span style="font-size: 1.2rem" class="bi bi-bank" aria-hidden="true"></span> Trh
+                </div>
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="invest">
+                <div style="display: flex; text-align:center; justify-content: right ;color: white;">
+                    <span style="font-size: 1.2rem" class="bi bi-graph-up-arrow" aria-hidden="true"></span> Spoření
+                </div>
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="loan">
+                <div style="display: flex; text-align:center; justify-content: right ;color: white;">
+                    <span style="font-size: 1.2rem" class="bi bi-graph-down-arrow" aria-hidden="true"></span> Půjčka
+                </div>
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="portfolio">
+                <div style="display: flex; text-align:center; justify-content: right ;color: white;">
+                    <span style="font-size: 1.2rem" class="bi bi-pie-chart-fill" aria-hidden="true"></span> Portfolio
+                </div>
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="note">
+                <div style="display: flex; text-align:center; justify-content: right ;color: white;">
+                    <span style="font-size: 1.2rem" class="bi bi-pass-fill" aria-hidden="true"></span> Poznámky
+                </div>
+            </NavLink>
+        </div>
+    </nav>
+</div>

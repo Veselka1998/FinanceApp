@@ -1,0 +1,47 @@
+﻿@page "/portfoliocreate"
+@using FinanceApp.Components.Models
+@using FinanceApp.Components.Services
+@inject PortfolioService PortfolioService
+
+<div style="text-align: center">
+    <h2 style="margin-bottom: 3rem"><b>Přidat kvartál</b></h2>
+</div>
+
+<NavLink class="btn btn-primary" href="/portfolio">Zpět</NavLink>
+
+<EditForm Model="portfolio" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <div>
+        <label for="kvartal">Kvartál:</label>
+        <InputSelect id="kvartal" @bind-Value="portfolio.Quarter" class="form-control">
+            <option value="Q1">Q1</option>
+            <option value="Q2">Q2</option>
+            <option value="Q3">Q3</option>
+            <option value="Q4">Q4</option>
+        </InputSelect>
+    </div>
+    <div>
+        <label for="year">Rok:</label>
+        <InputText id="year" @bind-Value="portfolio.Year" class="form-control" />
+        <ValidationMessage For="@(() => portfolio.Year)" />
+    </div>
+    @if (successMessage != null)
+    {
+        <p class="text-success">@successMessage</p>
+    }
+    <div style="text-align:center; margin-top: 1rem;">
+        <button type="submit" class="btn btn-primary">Přidat</button>
+    </div>
+</EditForm>
+
+@code {
+   private Portfolio portfolio = new Portfolio();
+    private string? successMessage;
+
+    private async void HandleValidSubmit()
+    {
+        await PortfolioService.AddPortfolioAsync(portfolio);
+        successMessage = "Úspěšně přidáno!";
+        portfolio = new Portfolio();
+    }
+}

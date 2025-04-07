@@ -1,0 +1,76 @@
+﻿@page "/loan"
+@using Components.Models
+
+<div class="container" style="text-align: center;">
+    <h2 style="margin-bottom: 3rem"><b>Půjčka</b></h2>
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <EditForm Model="loan" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <div>
+                    <label for="name">Výše úvěru:</label>
+                    <InputNumber id="name" @bind-Value="loan.LoanAmount" class="form-control" />
+                    <ValidationMessage For="@(() => loan.LoanAmount)" />
+                </div>
+                <div>
+                    <label for="name">Doba splatnost:</label>
+                    <InputNumber id="name" @bind-Value="loan.LoanTerm" class="form-control" />
+                    <ValidationMessage For="@(() => loan.LoanTerm)" />
+                </div>
+                <div>
+                    <label for="name">Roční úrok:</label>
+                    <InputNumber id="name" @bind-Value="loan.InterestRate" class="form-control" />
+                    <ValidationMessage For="@(() => loan.InterestRate)" />
+                </div>
+                <div style="text-align:center; margin-top: 1rem;">
+                    <button type="submit" class="btn btn-primary">Spočítat</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@if (calculateTotalDebt.Any())
+{
+    <h3 style="margin-block: 2rem; text-align: center">@loan.ResultMoney Kč</h3>
+    <div class="container my-4">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover">
+                <thead>
+                    <tr>
+                        <td>Roky</td>
+                        <td>Úroky</td>
+                        <td>Dluh</td>
+                        <td>Zaplaceno</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < calculateTotalDebt.Count(); i++)
+                    {
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td><b style="color: red">@calculateTotalInterest[i]</b></td>
+                            <td>@calculateTotalDebt[i]</td>
+                            <td>@calculateTotalPayments[i]</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    Loan loan = new Loan();
+
+    List<string> calculateTotalInterest = new();
+    List<string> calculateTotalDebt = new();
+    List<string> calculateTotalPayments = new();
+
+    private async void HandleValidSubmit()
+    {
+        calculateTotalInterest = loan.CalculateTotalInterest();
+        calculateTotalDebt = loan.CalculateTotalDebt();
+        calculateTotalPayments = loan.CalculateTotalPayments();   
+    }
+}

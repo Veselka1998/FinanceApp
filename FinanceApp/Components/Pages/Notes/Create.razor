@@ -1,0 +1,43 @@
+﻿@page "/note/create"
+@using Components.Models
+@using Components.Services
+@inject NoteService NoteService
+@inject NavigationManager Navigation
+
+<div style="text-align: center">
+    <h3 style="margin-bottom: 3rem"><b>Přidat poznámku</b></h3>
+</div>
+
+<NavLink class="btn btn-primary" @onclick="@(() => NavigateToNote())">Zpět</NavLink>
+
+<EditForm Model="note" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <div>
+        <label for="name">Název:</label>
+        <InputText id="name" @bind-Value="note.Text" class="form-control" />
+        <ValidationMessage For="@(() => note.Text)" />
+    </div>
+    @if (successMessage != null)
+    {
+        <p class="text-success">@successMessage</p>
+    }
+    <div style="text-align:center; margin-top: 1rem;">
+        <button type="submit" class="btn btn-primary">Přidat</button>
+    </div>
+</EditForm>
+
+@code {
+    private Note note = new Note();
+    private string? successMessage;
+
+    private async void HandleValidSubmit()
+    {
+        await NoteService.AddNoteAsync(note);
+        successMessage = "Poznámka přidána!";
+        note = new Note();
+    }
+    void NavigateToNote()
+    {
+        Navigation.NavigateTo($"/note");
+    }
+}

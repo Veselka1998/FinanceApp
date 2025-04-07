@@ -1,0 +1,80 @@
+﻿@page "/";
+@using Components.Services
+@using Components.Models
+@using Components.Helpers
+@inject MarketService MarketService
+
+<div style="text-align: center">
+    <h2 style="margin-bottom: 3rem"><b>Trh</b></h2>
+</div>
+
+<div class="container my-4">
+    <div class="table-responsive">
+        <table class="table table-dark table-hover">
+            <tbody>
+                @foreach (var stock in stocks)
+                {
+                    <tr>
+                        <td style="font-size: 1rem">@stock.Key</td>
+                        <td style="font-size: 1rem" id="last-item">
+                            <span style="margin-right: 0.5rem;">
+                                @(stock.Value.HasValue ? NumberFormatter.FormatWithSpaces(stock.Value.Value.ToString("F2")) : "...")
+                            </span>
+                            USD
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private static List<KeyValuePair<string, decimal?>> stocks = new();
+    private static DateTime lastUpdate = DateTime.MinValue;
+    private static Timer? timer;
+    private static readonly object _lock = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (timer == null)
+        {
+            lock (_lock)
+            {
+                if (timer == null)
+                {
+                    timer = new Timer(async _ => await RefreshData(), null, TimeSpan.Zero, TimeSpan.FromSeconds(20));
+                }
+            }
+        }
+
+        // API umožňuje 60 dotazů za 60 sekund
+        // Načteme data každých 20 sekund. 
+        if ((DateTime.Now - lastUpdate).TotalSeconds > 20)
+        {
+            await RefreshData();
+        }
+    }
+
+    private async Task RefreshData()
+    {
+        var newStocks = new List<KeyValuePair<string, decimal?>>()
+        {           
+            new KeyValuePair<string, decimal?>("Apple", await MarketService.GetStockPrice("AAPL")),
+            new KeyValuePair<string, decimal?>("Google", await MarketService.GetStockPrice("GOOGL")),
+            new KeyValuePair<string, decimal?>("Microsoft", await MarketService.GetStockPrice("MSFT")),
+            new KeyValuePair<string, decimal?>("Amazon", await MarketService.GetStockPrice("AMZN")),
+            new KeyValuePair<string, decimal?>("Palantir", await MarketService.GetStockPrice("PLTR")),
+            new KeyValuePair<string, decimal?>("S&P 500", await MarketService.GetStockPrice("SPY")),
+            new KeyValuePair<string, decimal?>("Berkshire Hathaway", await MarketService.GetStockPrice("BRK.A")),
+            new KeyValuePair<string, decimal?>("Coca-Cola", await MarketService.GetStockPrice("KO")),
+            new KeyValuePair<string, decimal?>("McDonald's", await MarketService.GetStockPrice("MCD")),
+            new KeyValuePair<string, decimal?>("Bitcoin", await MarketService.GetStockPrice("BINANCE:BTCUSDT"))
+        };
+
+        stocks = newStocks;
+        lastUpdate = DateTime.Now;
+        await InvokeAsync(StateHasChanged);
+    }
+}
+

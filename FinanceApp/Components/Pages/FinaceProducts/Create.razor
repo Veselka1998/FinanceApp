@@ -1,0 +1,75 @@
+﻿@page "/financeproduct/create/{id:int}"
+@using FinanceApp.Components.Models
+@using FinanceApp.Components.Services
+@inject PortfolioService PortfolioService
+@inject FinanceProductService FinanceProductService
+@inject NavigationManager Navigation
+
+<div style="text-align: center">
+    <h3 style="margin-bottom: 3rem"><b>Přidat finanční produkt</b></h3>
+</div>
+
+<NavLink class="btn btn-primary" @onclick="@(() => NavigateToDetail((uint)Id))">
+    Zpět
+</NavLink>
+
+<EditForm Model="financeProduct" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <input type="hidden" @bind="financeProduct.PortfolioId" />
+    <div>
+        <label for="name">Název investičního produktu:</label>
+        <InputText id="name" @bind-Value="financeProduct.Name" class="form-control" />
+        <ValidationMessage For="@(() => financeProduct.Name)" />
+    </div>
+    <div>
+        <label for="price">Hodnota:</label>
+        <InputNumber id="price" @bind-Value="financeProduct.Price" class="form-control" />
+        <ValidationMessage For="@(() => financeProduct.Price)" />
+    </div>
+    <div>
+        <label for="type">Investiční sektor:</label>
+        <InputSelect id="type" @bind-Value="financeProduct.InvestmentType" class="form-control">
+            <option value="Akcie">Akcie</option>
+            <option value="Kryptoměny">Kryptoměny</option>
+            <option value="Nemovitosti">Nemovitosti</option>
+            <option value="Komodity">Komodity</option>
+            <option value="Dluhopisy">Dluhopisy</option>
+            <option value="Hotovost">Hotovost</option>
+            <option value="Jiné">Jiné</option>
+        </InputSelect>
+    </div>
+    @if (successMessage != null)
+    {
+        <p class="text-success">@successMessage</p>
+    }
+    <div style="text-align:center; margin-top: 1rem;">
+        <button type="submit" class="btn btn-primary">Přidat</button>
+    </div>
+</EditForm>
+
+@code {
+    private string? successMessage;
+    [Parameter]
+    public int Id { get; set; }
+
+    private FinanceProduct financeProduct = new FinanceProduct();
+
+    protected override void OnInitialized()
+    {
+        
+    }
+    private async void HandleValidSubmit()
+    {
+        financeProduct.PortfolioId = (uint)Id;
+        await FinanceProductService.AddFinanceProductAsync(financeProduct);
+        successMessage = "Produkt přidán!";
+        financeProduct = new FinanceProduct();
+        StateHasChanged();
+    }
+    void NavigateToDetail(uint id)
+    {
+        Navigation.NavigateTo($"/portfolio/detail/{id}");
+    }
+}
+
+
