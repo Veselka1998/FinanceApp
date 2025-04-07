@@ -11,7 +11,6 @@ public class NoteService
     public NoteService(AppDbContext context)
     {
         _context = context;
-        _context.Database.EnsureCreated();
     }
 
     public async Task<List<Note>> GetNotesAsync()

@@ -11,7 +11,6 @@ public class PortfolioService
     public PortfolioService(AppDbContext context)
     {
         _context = context;
-        _context.Database.EnsureCreated();
     }
 
     public async Task<List<Portfolio>> GetPortfoliosAsync()

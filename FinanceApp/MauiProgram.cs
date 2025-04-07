@@ -33,6 +33,10 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
-        return builder.Build();
+        MauiApp mauiApp = builder.Build();
+
+        var db = mauiApp.Services.GetRequiredService<AppDbContext>();
+        db.Database.Migrate();
+        return mauiApp;
     }
 }

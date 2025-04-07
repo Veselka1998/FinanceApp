@@ -11,7 +11,6 @@ public class FinanceProductService
     public FinanceProductService(AppDbContext context)
     {
         _context = context;
-        _context.Database.EnsureCreated();
     }
 
     public async Task<List<FinanceProduct>> GetFinanceProductsAsync()
